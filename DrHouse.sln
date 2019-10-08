@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.27428.2043
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.29209.62
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "HealthDependencies", "HealthDependencies", "{0D4BAE24-25A5-4347-852B-C06DA362FB7A}"
 EndProject
@@ -9,13 +9,13 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{F51246C9-5
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DrHouse", "src\DrHouse\DrHouse.csproj", "{B0BEF15C-545E-4BDE-B004-ACD673287AF4}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DrHouse.Directory", "src\DrHouse.Directory\DrHouse.Directory.csproj", "{5AC4F10B-FC38-4FF3-8D4A-B3853B92E59C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DrHouse.Directory", "src\DrHouse.Directory\DrHouse.Directory.csproj", "{5AC4F10B-FC38-4FF3-8D4A-B3853B92E59C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DrHouse.SqlServer", "src\DrHouse.SqlServer\DrHouse.SqlServer.csproj", "{D6AF16E5-537C-40BA-B1C4-2C3D7BB1C13D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DrHouse.Database", "src\DrHouse.SqlServer\DrHouse.Database.csproj", "{D6AF16E5-537C-40BA-B1C4-2C3D7BB1C13D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DrHouse.Telnet", "src\DrHouse.Telnet\DrHouse.Telnet.csproj", "{CAA36839-8BAC-46D2-887A-163CAFE3C082}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DrHouse.Telnet", "src\DrHouse.Telnet\DrHouse.Telnet.csproj", "{CAA36839-8BAC-46D2-887A-163CAFE3C082}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DrHouse.UnitTest", "test\DrHouse.UnitTest\DrHouse.UnitTest.csproj", "{89D0BE15-E265-468D-9ECC-6DD1AA4BA50F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DrHouse.UnitTest", "test\DrHouse.UnitTest\DrHouse.UnitTest.csproj", "{89D0BE15-E265-468D-9ECC-6DD1AA4BA50F}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

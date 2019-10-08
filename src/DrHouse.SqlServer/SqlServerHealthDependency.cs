@@ -3,136 +3,35 @@ using System;
 using System.Collections.Generic;
 using System.Data.SqlClient;
 using DrHouse.Events;
+using System.Data;
 
 namespace DrHouse.SqlServer
 {
-    public class SqlServerHealthDependency : IHealthDependency
+    public class SqlServerHealthDependency : AbstractDatabaseHealthDependency
     {
-        private readonly string _databaseName;
-        private readonly string _connectionString;
-        private readonly IDictionary<string, ICollection<TablePermission>> _permissions;
-        private readonly ICollection<Index> _indexes;
 
-        public event EventHandler<DependencyExceptionEvent> OnDependencyException;
-
-        public SqlServerHealthDependency(string databaseName, string connectionString)
+        public SqlServerHealthDependency(string databaseName, string connectionString) : base()
         {
             _databaseName = databaseName;
             _connectionString = connectionString;
             _permissions = new Dictionary<string, ICollection<TablePermission>>();
             _indexes = new List<Index>();
+            _type = "SqlServer";
         }
 
-        public void AddTableDependency(string tableName, Permission permissionSet)
+        public override IDbConnection GetConnection()
         {
-            if(_permissions.ContainsKey(tableName) == false)
-            {
-                _permissions.Add(tableName, new List<TablePermission>());
-            }
-
-            ICollection<TablePermission> tablePermisionCollection = _permissions[tableName];
-
-            foreach(Permission permission in Enum.GetValues(typeof(Permission)))
-            {
-                if((permission & permissionSet) != 0)
-                {
-                    tablePermisionCollection.Add(new TablePermission()
-                    {
-                        TableName = tableName,
-                        Permission = permission,
-                    });
-                }
-            }
+            return new SqlConnection(_connectionString);
         }
 
-        public void AddIndexDependency(string tableName, string indexName)
-        {
-            _indexes.Add(new Index { TableName = tableName, IndexName = indexName });
-        }
-
-        public HealthData CheckHealth()
-        {
-            HealthData sqlHealthData = new HealthData(_databaseName);
-            sqlHealthData.Type = "SqlServer";
-
-            try
-            {
-                using (SqlConnection sqlConnection = new SqlConnection(_connectionString))
-                {
-                    if (sqlConnection.State != System.Data.ConnectionState.Open)
-                    {
-                        sqlConnection.Open();
-                    }
-
-                    sqlHealthData = new HealthData(sqlConnection.Database);
-                    sqlHealthData.Type = "SqlServer";
-
-                    foreach (string tableName in _permissions.Keys)
-                    {
-                        HealthData tableHealth = CheckTablePermissions(tableName, _permissions[tableName], sqlConnection);
-                        sqlHealthData.DependenciesStatus.Add(tableHealth);
-                    }
-
-                    foreach (Index ix in _indexes)
-                    {
-                        HealthData indexHealth = CheckIndex(ix, sqlConnection);
-                        sqlHealthData.DependenciesStatus.Add(indexHealth);
-                    }
-
-                    sqlHealthData.IsOK = true;
-                }
-            }
-            catch (Exception ex)
-            {
-                OnDependencyException?.Invoke(this, new DependencyExceptionEvent(ex));
-
-                sqlHealthData.IsOK = false;
-                sqlHealthData.ErrorMessage = ex.Message;
-            }
-
-            return sqlHealthData;
-        }
-
-        private HealthData CheckTablePermissions(string tableName, ICollection<TablePermission> permissions, SqlConnection sqlConnection)
-        {
-            HealthData tableHealth = new HealthData(tableName);
-
-            try
-            {
-                foreach (TablePermission permission in permissions)
-                {
-                    HealthData tablePermissionHealth = new HealthData(permission.Permission.ToString());
-
-                    tablePermissionHealth.IsOK = CheckPermission(permission, sqlConnection);
-                    if(tablePermissionHealth.IsOK == false)
-                    {
-                        tablePermissionHealth.ErrorMessage = "Does not have permission.";
-                    }
-
-                    tableHealth.DependenciesStatus.Add(tablePermissionHealth);
-                }
-
-                tableHealth.IsOK = true;
-            }
-            catch (Exception ex)
-            {
-                OnDependencyException?.Invoke(this, new DependencyExceptionEvent(ex));
-
-                tableHealth.ErrorMessage = ex.Message;
-                tableHealth.IsOK = false;
-            }
-
-            return tableHealth;
-        }
-
-        private bool CheckPermission(TablePermission permission, SqlConnection sqlConnection)
+        public override bool CheckPermission(TablePermission permission)
         {
             string query = @"SELECT HAS_PERMS_BY_NAME (@tableName, 'OBJECT', @permission)";
             var permissionCmd = new SqlCommand(query);
             permissionCmd.Parameters.Add(new SqlParameter() { ParameterName = "@tableName", Value = permission.TableName });
             permissionCmd.Parameters.Add(new SqlParameter() { ParameterName = "@permission", Value = permission.Permission.ToString() });
 
-            permissionCmd.Connection = sqlConnection;
+            permissionCmd.Connection = _dbConnection as SqlConnection;
 
             var reader = permissionCmd.ExecuteReader();
             reader.Read();
@@ -143,7 +42,7 @@ namespace DrHouse.SqlServer
             return result;
         }
 
-        private HealthData CheckIndex(Index index, SqlConnection sqlConnection)
+        public override HealthData CheckIndex(Index index)
         {
             HealthData tableHealth = new HealthData(index.IndexName);
 
@@ -155,7 +54,7 @@ namespace DrHouse.SqlServer
                 permissionCmd.Parameters.Add(new SqlParameter() { ParameterName = "@indexName", Value = index.IndexName });
                 permissionCmd.Parameters.Add(new SqlParameter() { ParameterName = "@tableName", Value = index.TableName });
 
-                permissionCmd.Connection = sqlConnection;
+                permissionCmd.Connection = _dbConnection as SqlConnection;
 
                 bool result = false;
                 using (var reader = permissionCmd.ExecuteReader())
@@ -175,7 +74,7 @@ namespace DrHouse.SqlServer
             }
             catch (Exception ex)
             {
-                OnDependencyException?.Invoke(this, new DependencyExceptionEvent(ex));
+                base.InvokeDependencyException(ex);
 
                 tableHealth.ErrorMessage = ex.Message;
                 tableHealth.IsOK = false;
@@ -184,9 +83,5 @@ namespace DrHouse.SqlServer
             return tableHealth;
         }
 
-        public HealthData CheckHealth(Action check)
-        {
-            throw new NotImplementedException();
-        }
     }
 }

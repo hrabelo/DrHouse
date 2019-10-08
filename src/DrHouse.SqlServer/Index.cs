@@ -1,6 +1,6 @@
 ﻿namespace DrHouse.SqlServer
 {
-    internal class Index
+    public class Index
     {
         public string TableName { get; set; }
 
