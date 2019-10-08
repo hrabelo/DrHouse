@@ -12,6 +12,8 @@ Current implementation includes the following Health Checkers:
   and the specified user permissions to it (i.e. R/W)
 - [SqlServer](docs/health-checkers/SqlServer.md) - checks the connection with
   SQL Server database and the specified permissions
+- [Oracle](docs/health-checkers/Oracle.md) - checks the connection with
+  Oracle database and the specified permissions
 - [Telnet](docs/health-checkers/Telnet.md) - checks the connectivity with a server
 
 ## Throubleshooting dependencies
